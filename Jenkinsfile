@@ -3,11 +3,10 @@ pipeline {
 
     environment {
         NETLIFY_PROJECT_ID = "cfe19d22-cdb4-4d2d-94b9-105c7d64a37e"
-        NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN') 
+        NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
     }
 
     stages {
-        
         stage('Build') {
             agent {
                 docker {
@@ -26,7 +25,6 @@ pipeline {
                 '''
             }
         }
-        
 
         stage('Test') {
             agent {
@@ -35,7 +33,6 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh '''
                     #test -f build/index.html
@@ -51,34 +48,31 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh '''
                     npm install serve
                     node_modules/.bin/serve -s build &
                     sleep 10
                     npx playwright test --reporter=html
-                 
                 '''
             }
         }
 
-         stage('Deploy') {
+        stage('Deploy') {
             agent {
                 docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
             }
-
             steps {
-                sh '''
-                    npm install netlify-cli 
-                    node_modules/.bin/netlify -v
-                    node_modules/.bin/netlify status
-
-                    
-                '''
+                script {
+                    sh """
+                        npm install netlify-cli
+                        echo "Deploying to Netlify..."
+                        npx netlify deploy --prod --dir=build --site=${env.NETLIFY_PROJECT_ID} --auth=${env.NETLIFY_AUTH_TOKEN}
+                    """
+                }
             }
         }
     }
