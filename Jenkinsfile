@@ -44,11 +44,24 @@ pipeline {
             steps {
                 sh '''
                     npm install serve
-                    node_modules/serve/bin/serve.js -s build
-                    sleep 10
+                    npx serve -s build -l 3000 &
+                    SERVE_PID=$!
+                    echo "Waiting for server to start..."
+                    sleep 5
+                    until curl -f http://localhost:3000 > /dev/null 2>&1; do
+                        echo "Waiting for server..."
+                        sleep 1
+                    done
+                    echo "Server is ready!"
                     npx playwright test
-                    cat playwright-report/junit.xml || echo "Test results file not found"
+                    kill $SERVE_PID || true
                 '''
+            }
+            post {
+                always {
+                    sh 'pkill -f "serve.*build" || true'
+                    junit 'test-results/junit.xml'
+                }
             }
         }
     }
