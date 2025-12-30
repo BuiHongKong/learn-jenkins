@@ -30,8 +30,13 @@ pipeline {
             steps {
                 sh ''' 
                     npm test
-                    ls -la test-results/
+                    cat test-results/junit.xml || echo "Test results file not found"
                 '''
+            }
+            post {
+                always {
+                    junit 'test-results/junit.xml'
+                }
             }
         }
     }
