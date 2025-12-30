@@ -54,13 +54,14 @@ pipeline {
                     done
                     echo "Server is ready!"
                     npx playwright test
+                    cat test-results/playwright-junit.xml || echo "Playwright test results file not found"
                     kill $SERVE_PID || true
                 '''
             }
             post {
                 always {
                     sh 'pkill -f "serve.*build" || true'
-                    junit 'test-results/junit.xml'
+                    junit 'test-results/playwright-junit.xml'
                 }
             }
         }
@@ -68,7 +69,8 @@ pipeline {
 
     post {
         always {
-            junit 'jest-results/junit.xml'
+            junit 'test-results/junit.xml'
+            junit 'test-results/playwright-junit.xml'
         }
     }
 }
