@@ -66,13 +66,11 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    sh """
-                        npm install netlify-cli
-                        echo "Deploying to Netlify..."
-                        npx netlify deploy --prod --dir=build --site=${env.NETLIFY_PROJECT_ID} --auth=${env.NETLIFY_AUTH_TOKEN}
-                    """
-                }
+                sh '''
+                    npm install netlify-cli
+                    echo "Deploying to Netlify..."
+                    npx netlify deploy --prod --dir=build --site="$NETLIFY_PROJECT_ID" --auth="$NETLIFY_AUTH_TOKEN"
+                '''
             }
         }
     }
