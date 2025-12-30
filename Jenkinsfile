@@ -20,5 +20,14 @@ pipeline {
                 '''
             }
         }
+    stage('Test') {
+        steps {
+            sh '''
+                echo "Testing the application"
+                npm test
+                ls -la
+            '''
+        }
+    }
     }
 }
