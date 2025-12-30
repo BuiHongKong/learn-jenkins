@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     stages {
+        /*
+
         stage('Build') {
             agent {
                 docker {
@@ -12,14 +14,16 @@ pipeline {
             steps {
                 sh '''
                     ls -la
-                    node -v
-                    npm -v
+                    node --version
+                    npm --version
                     npm ci
                     npm run build
                     ls -la
                 '''
             }
         }
+        */
+
         stage('Test') {
             agent {
                 docker {
@@ -27,13 +31,15 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
+                    #test -f build/index.html
                     npm test
-                    cat test-results/junit.xml || echo "Test results file not found"
                 '''
             }
         }
+
         stage('E2E') {
             agent {
                 docker {
@@ -41,36 +47,21 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                     npm install serve
-                    npx serve -s build -l 3000 &
-                    SERVE_PID=$!
-                    echo "Waiting for server to start..."
-                    sleep 5
-                    until curl -f http://localhost:3000 > /dev/null 2>&1; do
-                        echo "Waiting for server..."
-                        sleep 1
-                    done
-                    echo "Server is ready!"
+                    node_modules/.bin/serve -s build &
+                    sleep 10
                     npx playwright test
-                    cat test-results/playwright-junit.xml || echo "Playwright test results file not found"
-                    kill $SERVE_PID || true
                 '''
-            }
-            post {
-                always {
-                    sh 'pkill -f "serve.*build" || true'
-                    junit 'test-results/playwright-junit.xml'
-                }
             }
         }
     }
 
     post {
         always {
-            junit 'test-results/junit.xml'
-            junit 'test-results/playwright-junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
