@@ -44,7 +44,8 @@ pipeline {
             steps {
                 sh '''
                     npm install serve
-                    node_modules/serve/bin/serve.js -s build -l 3000 &
+                    node_modules/serve/bin/serve.js -s build
+                    sleep 10
                     npx playwright test
                     cat playwright-report/junit.xml || echo "Test results file not found"
                 '''
