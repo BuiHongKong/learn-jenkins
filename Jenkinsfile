@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Build') {
             agent {
@@ -28,13 +28,12 @@ pipeline {
                 }
             }
             steps {
-                sh ''' 
+                sh '''
                     npm test
                     cat test-results/junit.xml || echo "Test results file not found"
                 '''
             }
         }
-
         stage('E2E') {
             agent {
                 docker {
@@ -43,16 +42,15 @@ pipeline {
                 }
             }
             steps {
-                sh ''' 
-                    npm install -g serve
-                    serve -s build -l 3000
+                sh '''
+                    npm install serve
+                    node_modules/serve/bin/serve.js -s build -l 3000 &
                     npx playwright test
                     cat playwright-report/junit.xml || echo "Test results file not found"
                 '''
             }
         }
     }
-
 
     post {
         always {
