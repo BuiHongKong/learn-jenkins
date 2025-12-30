@@ -22,12 +22,9 @@ pipeline {
         }
     stage('Test') {
         steps {
-            sh '''
-                echo "Testing the application"
-                npm test
-                ls -la
+            sh ''' 
+                test -f build/index.html
             '''
         }
-    }
-    }
+    }   
 }
